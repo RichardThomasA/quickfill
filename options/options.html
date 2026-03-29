@@ -23,6 +23,14 @@
       <textarea id="allowed-sites" rows="6" placeholder="example.com"></textarea>
     </section>
 
+    <section>
+      <h3>Import from JSON</h3>
+      <p class="help-text">Upload a JSON file with "texts" (array of {label, value}) and "allowedSites" (array of strings) to replace current settings. Example: {"texts": [{"label": "Greeting", "value": "Hello"}], "allowedSites": ["example.com"]}. See samples/sample.json for a complete example.</p>
+      <input type="file" id="json-file" accept=".json">
+      <button id="import-json" class="secondary-btn">Import JSON</button>
+      <button id="export-json" class="secondary-btn">Export JSON</button>
+    </section>
+
     <div class="footer">
       <button id="save" class="primary-btn">Save Configuration</button>
     </div>
