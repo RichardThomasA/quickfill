@@ -1,25 +1,26 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const btn = document.getElementById('toggle');
-  const optionsLink = document.getElementById('open-options');
+  const statusText = document.getElementById('status-text');
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const key = `tab_disabled_${tab.id}`;
+  const key = `disabled_${tab.id}`;
 
   chrome.storage.local.get([key], (data) => {
-    btn.textContent = data[key] ? "Enable for Tab" : "Disable for Tab";
+    const isDisabled = !!data[key];
+    btn.textContent = isDisabled ? "Enable for this Tab" : "Disable for this Tab";
+    statusText.textContent = isDisabled ? "Extension is Paused" : "Extension is Active";
+    document.querySelector('.dot').style.backgroundColor = isDisabled ? '#ff4b2b' : '#4caf50';
   });
 
   btn.onclick = () => {
     chrome.storage.local.get([key], (data) => {
-      const isCurrentlyDisabled = data[key];
-      chrome.storage.local.set({ [key]: !isCurrentlyDisabled }, () => {
-        window.close(); // Close popup to apply
-        chrome.tabs.reload(tab.id);
+      const newState = !data[key];
+      chrome.storage.local.set({ [key]: newState }, () => {
+        // Force background to update icon and menus immediately
+        chrome.runtime.sendMessage({ action: "refresh_state", tabId: tab.id });
+        window.close();
       });
     });
   };
 
-  optionsLink.onclick = (e) => {
-    e.preventDefault();
-    chrome.runtime.openOptionsPage();
-  };
+  document.getElementById('open-options').onclick = () => chrome.runtime.openOptionsPage();
 });

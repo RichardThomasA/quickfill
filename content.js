@@ -1,16 +1,22 @@
-let lastElement = null;
+// This variable stores the last element you right-clicked
+let lastTarget = null;
 
-document.addEventListener("contextmenu", (e) => { lastElement = e.target; }, true);
+// Listen for the right-click event to capture the specific input field
+document.addEventListener("contextmenu", (event) => {
+  lastTarget = event.target;
+}, true);
 
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  if (request.action === "fill_text" && lastElement) {
-    const { enabledSites } = await chrome.storage.sync.get(['enabledSites']);
-    const tabState = await chrome.storage.local.get([`tab_active_current`]); // Simplified for demonstration
+// Listen for the 'fill_text' message from background.js
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "fill_text" && lastTarget) {
+    // Fill the value
+    lastTarget.value = request.text;
+
+    // IMPORTANT: Dispatch 'input' and 'change' events 
+    // This ensures modern websites (React/Vue) recognize the new text
+    lastTarget.dispatchEvent(new Event('input', { bubbles: true }));
+    lastTarget.dispatchEvent(new Event('change', { bubbles: true }));
     
-    // Final check: Is domain exactly in list?
-    if (enabledSites.includes(window.location.hostname)) {
-       lastElement.value = request.text;
-       lastElement.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    sendResponse({ status: "success" });
   }
 });

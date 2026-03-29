@@ -35,9 +35,6 @@ body {
   cursor: pointer;
   font-weight: bold;
 }
-.toggle-btn.disabled {
-  background: #ff4b2b;
-}
 .footer {
   margin-top: 12px;
   border-top: 1px solid #eee;

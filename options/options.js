@@ -21,15 +21,15 @@ document.getElementById('save').onclick = () => {
     value: r.querySelector('.value').value
   })).filter(t => t.label);
   
-  const enabledSites = sitesArea.value.split('\n').map(s => s.trim()).filter(s => s);
+  const allowedSites = sitesArea.value.split('\n').map(s => s.trim()).filter(s => s);
   
-  chrome.storage.sync.set({ texts, enabledSites }, () => {
+  chrome.storage.sync.set({ texts, allowedSites }, () => {
     alert('Settings Saved!');
     chrome.runtime.reload(); // Refresh background logic
   });
 };
 
-chrome.storage.sync.get(['texts', 'enabledSites'], (data) => {
+chrome.storage.sync.get(['texts', 'allowedSites'], (data) => {
   if (data.texts) data.texts.forEach(t => addRow(t.label, t.value));
-  if (data.enabledSites) sitesArea.value = data.enabledSites.join('\n');
+  if (data.allowedSites) sitesArea.value = data.allowedSites.join('\n');
 });

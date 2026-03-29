@@ -1,28 +1,46 @@
-// Helper to check exact domain match (no subdomains)
+// Helper: Check if domain matches exactly (no subdomains)
 function isUrlAllowed(url, allowedSites) {
   try {
     const hostname = new URL(url).hostname;
-    // Requirement: example.com matches example.com/path but NOT sub.example.com
-    return allowedSites.includes(hostname);
+    return (allowedSites || []).includes(hostname);
   } catch (e) { return false; }
 }
 
-async function refreshContextMenu(tab) {
+// Update Icon based on disabled state
+async function updateTabIcon(tabId, isDisabled) {
+  const suffix = isDisabled ? "_grey.png" : ".png";
+  chrome.action.setIcon({
+    tabId: tabId,
+    path: {
+      "16": `icons/icon16${suffix}`,
+      "48": `icons/icon48${suffix}`,
+      "128": `icons/icon128${suffix}`
+    }
+  });
+}
+
+// Refresh Menus and Icons
+async function refreshTabState(tabId) {
+  const tab = await chrome.tabs.get(tabId);
+  const data = await chrome.storage.sync.get(['texts', 'allowedSites']);
+  const localData = await chrome.storage.local.get([`disabled_${tabId}`]);
+  
+  const isDisabled = !!localData[`disabled_${tabId}`];
+  const isAllowedDomain = isUrlAllowed(tab.url, data.allowedSites);
+
+  // Update Icon
+  updateTabIcon(tabId, isDisabled);
+
+  // Update Context Menu
   await chrome.contextMenus.removeAll();
-  if (!tab || !tab.url) return;
-
-  const data = await chrome.storage.sync.get(['texts', 'enabledSites']);
-  const sites = data.enabledSites || [];
-  const texts = data.texts || [];
-
-  if (isUrlAllowed(tab.url, sites) && texts.length > 0) {
+  if (isAllowedDomain && !isDisabled && data.texts?.length > 0) {
     chrome.contextMenus.create({
       id: "quickFillParent",
       title: "QuickFill",
       contexts: ["editable"]
     });
 
-    texts.forEach((item, index) => {
+    data.texts.forEach((item, index) => {
       chrome.contextMenus.create({
         id: `fill-${index}`,
         parentId: "quickFillParent",
@@ -33,9 +51,15 @@ async function refreshContextMenu(tab) {
   }
 }
 
-// Update menu when switching tabs or loading pages
-chrome.tabs.onUpdated.addListener((id, info, tab) => { if(info.status === 'complete') refreshContextMenu(tab); });
-chrome.tabs.onActivated.addListener(async (info) => { const tab = await chrome.tabs.get(info.tabId); refreshContextMenu(tab); });
+// Listeners
+chrome.tabs.onUpdated.addListener((id, info) => { if(info.status === 'complete') refreshTabState(id); });
+chrome.tabs.onActivated.addListener(info => refreshTabState(info.tabId));
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === "refresh_state") {
+    refreshTabState(msg.tabId);
+  }
+});
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId.startsWith("fill-")) {
