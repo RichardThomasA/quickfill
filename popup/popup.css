@@ -1,0 +1,50 @@
+body {
+  width: 220px;
+  margin: 0;
+  font-family: sans-serif;
+}
+.popup-container {
+  padding: 15px;
+  text-align: center;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dot {
+  height: 8px;
+  width: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+}
+#status-text {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+.toggle-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background: #333;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+.toggle-btn.disabled {
+  background: #ff4b2b;
+}
+.footer {
+  margin-top: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+.footer a {
+  font-size: 0.8rem;
+  color: #ff4b2b;
+  text-decoration: none;
+}

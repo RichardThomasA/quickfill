@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QuickFill Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>QuickFill Pro Settings</h1>
+    </header>
+
+    <section>
+      <h3>Text Snippets</h3>
+      <div id="text-container">
+        </div>
+      <button id="add" class="secondary-btn">+ Add New Snippet</button>
+    </section>
+
+    <section>
+      <h3>Allowed Domains</h3>
+      <p class="help-text">Enter exact domains (e.g., <b>google.com</b>), one per line. Subdomains like <i>mail.google.com</i> will be ignored.</p>
+      <textarea id="allowed-sites" rows="6" placeholder="example.com"></textarea>
+    </section>
+
+    <div class="footer">
+      <button id="save" class="primary-btn">Save Configuration</button>
+    </div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
