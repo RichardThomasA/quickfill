@@ -23,17 +23,15 @@ async function updateTabIcon(tabId, isDisabled) {
 async function refreshTabState(tabId) {
   const tab = await chrome.tabs.get(tabId);
   const data = await chrome.storage.sync.get(['texts', 'allowedSites']);
-  const localData = await chrome.storage.local.get([`disabled_${tabId}`]);
   
-  const isDisabled = !!localData[`disabled_${tabId}`];
   const isAllowedDomain = isUrlAllowed(tab.url, data.allowedSites);
 
   // Update Icon
-  updateTabIcon(tabId, isDisabled);
+  updateTabIcon(tabId, !isAllowedDomain);
 
   // Update Context Menu
   await chrome.contextMenus.removeAll();
-  if (isAllowedDomain && !isDisabled && data.texts?.length > 0) {
+  if (isAllowedDomain && data.texts?.length > 0) {
     chrome.contextMenus.create({
       id: "quickFillParent",
       title: "QuickFill",
@@ -58,6 +56,10 @@ chrome.tabs.onActivated.addListener(info => refreshTabState(info.tabId));
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === "refresh_state") {
     refreshTabState(msg.tabId);
+  } else if (msg.action === "refresh_all") {
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => refreshTabState(tab.id));
+    });
   }
 });
 
