@@ -1,0 +1,15 @@
+{
+  "texts": [
+    {
+      "label": "Greeting",
+      "value": "Hello, how can I help you today?"
+    },
+    {
+      "label": "Closing",
+      "value": "Best regards,\nYour Name"
+    }
+  ],
+  "allowedSites": [
+    "example.com","www.roboform.com"
+  ]
+}
