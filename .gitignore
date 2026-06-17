@@ -1,0 +1,15 @@
+# Build output
+dist/*
+!dist/.gitkeep
+
+# Node deps
+/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,15 +1,67 @@
 const container = document.getElementById('text-container');
 const sitesArea = document.getElementById('allowed-sites');
 
+function normalizeText(s) {
+  if (typeof s !== 'string') return '';
+  // Replace newlines and tabs with a single space, collapse multiple spaces, trim ends
+  let r = s.replace(/\r\n|\r|\n|\t/g, ' ');
+  r = r.replace(/ {2,}/g, ' ');
+  return r.trim();
+}
+
+function normalizeLabel(s) {
+  if (typeof s !== 'string') return '';
+  // Labels should not contain newlines/tabs; keep other chars intact
+  let r = s.replace(/\r\n|\r|\n|\t/g, ' ');
+  r = r.replace(/ {2,}/g, ' ');
+  r = r.trim();
+  return r;
+}
+
 function addRow(label = '', value = '') {
   const div = document.createElement('div');
   div.className = 'row';
-  div.innerHTML = `
-    <input type="text" class="label" placeholder="Label" value="${label}">
-    <input type="text" class="value" placeholder="Text" value="${value}">
-    <button class="remove">Delete</button>
-  `;
-  div.querySelector('.remove').onclick = () => div.remove();
+
+  const labelInput = document.createElement('input');
+  labelInput.type = 'text';
+  labelInput.className = 'label';
+  labelInput.placeholder = 'Label';
+  labelInput.value = normalizeLabel(label);
+
+  const valueInput = document.createElement('input');
+  valueInput.type = 'text';
+  valueInput.className = 'value';
+  valueInput.placeholder = 'Text';
+  valueInput.value = normalizeText(value);
+
+  // Paste handlers to sanitize clipboard content immediately
+  labelInput.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    const sanitized = normalizeLabel(paste);
+    const start = labelInput.selectionStart || 0;
+    const end = labelInput.selectionEnd || 0;
+    labelInput.value = labelInput.value.slice(0, start) + sanitized + labelInput.value.slice(end);
+  });
+
+  valueInput.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    const sanitized = normalizeText(paste);
+    const start = valueInput.selectionStart || 0;
+    const end = valueInput.selectionEnd || 0;
+    valueInput.value = valueInput.value.slice(0, start) + sanitized + valueInput.value.slice(end);
+  });
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove';
+  removeBtn.textContent = 'Delete';
+  removeBtn.onclick = () => div.remove();
+
+  div.appendChild(labelInput);
+  div.appendChild(valueInput);
+  div.appendChild(removeBtn);
+
   container.appendChild(div);
 }
 
@@ -17,8 +69,8 @@ document.getElementById('add').onclick = () => addRow();
 
 document.getElementById('save').onclick = () => {
   const texts = Array.from(document.querySelectorAll('.row')).map(r => ({
-    label: r.querySelector('.label').value.trim(),
-    value: r.querySelector('.value').value
+    label: normalizeLabel(r.querySelector('.label').value),
+    value: normalizeText(r.querySelector('.value').value)
   })).filter(t => t.label);
   
   const allowedSites = sitesArea.value.split('\n').map(s => s.trim()).filter(s => s);
@@ -55,13 +107,17 @@ document.getElementById('import-json').onclick = () => {
           throw new Error('Allowed sites must be strings.');
         }
       }
+      // Sanitize before save
+      const sanitizedTexts = data.texts.map(t => ({ label: normalizeLabel(t.label), value: normalizeText(t.value) }));
+      const sanitizedSites = data.allowedSites.map(s => (typeof s === 'string' ? s.trim() : '')).filter(s => s);
+
       // Save
-      chrome.storage.sync.set({ texts: data.texts, allowedSites: data.allowedSites }, () => {
+      chrome.storage.sync.set({ texts: sanitizedTexts, allowedSites: sanitizedSites }, () => {
         alert('Settings imported successfully!');
         // Reload the UI
         container.innerHTML = '';
-        if (data.texts) data.texts.forEach(t => addRow(t.label, t.value));
-        if (data.allowedSites) sitesArea.value = data.allowedSites.join('\n');
+        if (sanitizedTexts) sanitizedTexts.forEach(t => addRow(t.label, t.value));
+        if (sanitizedSites) sitesArea.value = sanitizedSites.join('\n');
         chrome.runtime.reload();
       });
     } catch (error) {

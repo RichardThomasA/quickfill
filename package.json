@@ -1,0 +1,17 @@
+{
+  "name": "quickfill",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/copy-extension.js",
+    "build:extension": "npm run build",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
