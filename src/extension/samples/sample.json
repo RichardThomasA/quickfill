@@ -1,0 +1,6 @@
+{
+  "texts": [
+    { "label": "Greeting", "value": "Hello, how are you?" }
+  ],
+  "allowedSites": ["example.com"]
+}
