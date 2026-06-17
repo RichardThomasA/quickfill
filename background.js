@@ -6,6 +6,14 @@ function isUrlAllowed(url, allowedSites) {
   } catch (e) { return false; }
 }
 
+  function sanitizeMenuLabel(s) {
+    if (typeof s !== 'string') return '';
+    let r = s.replace(/\r\n|\r|\n|\t/g, ' ');
+    r = r.replace(/ {2,}/g, ' ');
+    r = r.trim();
+    return r;
+  }
+
 // Update Icon based on disabled state
 async function updateTabIcon(tabId, isDisabled) {
   const suffix = isDisabled ? "_grey.png" : ".png";
@@ -42,14 +50,14 @@ async function refreshTabState(tabId) {
       contexts: ["editable"]
     });
 
-    validTexts.forEach((item, index) => {
-      chrome.contextMenus.create({
-        id: `fill-${index}`,
-        parentId: "quickFillParent",
-        title: item.label,
-        contexts: ["editable"]
+      validTexts.forEach((item, index) => {
+        chrome.contextMenus.create({
+          id: `fill-${index}`,
+          parentId: "quickFillParent",
+          title: sanitizeMenuLabel(item.label),
+          contexts: ["editable"]
+        });
       });
-    });
     console.log('Menu created');
   } else {
     console.log('Menu not created');
