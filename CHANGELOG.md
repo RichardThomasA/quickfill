@@ -3,3 +3,8 @@ v1.0.1 : fix settings link.
 v1.0.2 : fixed icon color changing on pressing disable and enable button
 v1.0.3 : changed the behavior to be site specific.
 v1.0.4 : settings via json.fixed context menu. Added a sample upload json file for uploading.
+v1.0.5 : added sanitisation of input.
+
+## project restructured with tests and build system
+
+v1.0.6 : 
